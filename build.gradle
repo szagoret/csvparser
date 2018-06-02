@@ -1,0 +1,25 @@
+group 'com.rapidminer'
+version '0.1'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": 'com.rapidminer.CSVParserApplication'
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+dependencies {
+    compile 'org.jboss.resteasy:resteasy-client:3.5.1.Final'
+    compile 'org.jboss.resteasy:resteasy-jackson2-provider:3.5.1.Final'
+}
