@@ -1,7 +1,6 @@
 # Java Swing Generic CSV Parser
 
-Standalone java application which is able to parse the provided CSV files 
-a, sends the parsed data to a Web service and saves the result in a new file
+Standalone java application which is able to parse the provided CSV files, sends the parsed data to a Web service and saves the result in a new file
 
 [<img src="doc/csvparser-main.png">](doc/csvparser-main.png)
 
