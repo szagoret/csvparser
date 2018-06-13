@@ -1,5 +1,6 @@
 package com.rapidminer.execution;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -8,10 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class CSVExportExecution implements Consumer<Map<String, Map<String, Double>>> {
+public class CSVExportExecution implements Function<Map<String, Map<String, Double>>, File> {
 
     private static final String DEFAULT_SEPARATOR = ";";
     private static final String DEFAULT_FILE_NAME = "WSMedianResponse.csv";
@@ -19,10 +20,10 @@ public class CSVExportExecution implements Consumer<Map<String, Map<String, Doub
     private final String defaultColumnName = "label";
 
     @Override
-    public void accept(Map<String, Map<String, Double>> stringDoubleMap) {
-
+    public File apply(Map<String, Map<String, Double>> stringDoubleMap) {
+        final File resultFile = Paths.get(".", DEFAULT_FILE_NAME).toAbsolutePath().normalize().toFile();
         try {
-            final FileWriter writer = new FileWriter(Paths.get(".", DEFAULT_FILE_NAME).toAbsolutePath().normalize().toFile());
+            final FileWriter writer = new FileWriter(resultFile);
 
             // write header
             // use first element in the map to extract the columns
@@ -52,9 +53,12 @@ public class CSVExportExecution implements Consumer<Map<String, Map<String, Doub
             }
             writer.flush();
             writer.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return resultFile;
     }
 
     private void writeLine(Writer w, List<String> values) throws IOException {

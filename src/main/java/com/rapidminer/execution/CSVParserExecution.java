@@ -10,9 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static com.rapidminer.util.CSVUtil.DEFAULT_SEPARATOR;
+import static com.rapidminer.util.CSVUtil.readCSVLine;
+
 public class CSVParserExecution implements Supplier<Map<String, List<String>>> {
 
-    private static final char DEFAULT_SEPARATOR = ';';
 
     private final File file;
     private final Map<String, List<String>> dataCollector;
@@ -37,7 +39,7 @@ public class CSVParserExecution implements Supplier<Map<String, List<String>>> {
 
             while ((line = br.readLine()) != null) {
 
-                String[] row = readCSVLine(line);
+                String[] row = readCSVLine(line, DEFAULT_SEPARATOR);
 
                 if (firstRow) {
                     initCollection(row);
@@ -57,17 +59,6 @@ public class CSVParserExecution implements Supplier<Map<String, List<String>>> {
 
 
         return dataCollector;
-    }
-
-    // TODO: check if string is null or empty
-    // TODO: find the quotes that are part of the word and escape them
-    private String[] readCSVLine(String line) {
-
-        String[] row = line.split(String.valueOf(DEFAULT_SEPARATOR));
-        for (int i = 0; i < row.length; i++) {
-            row[i] = row[i].replace("\"", "");
-        }
-        return row;
     }
 
     private void initCollection(String[] header) {

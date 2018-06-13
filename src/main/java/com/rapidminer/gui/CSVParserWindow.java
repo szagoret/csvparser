@@ -3,6 +3,14 @@ package com.rapidminer.gui;
 import com.rapidminer.service.CSVParserService;
 import com.rapidminer.service.CSVProcessingService;
 import com.rapidminer.util.ImageUtil;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.StackedBarChart;
+import javafx.scene.chart.XYChart;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,6 +21,7 @@ import java.awt.*;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.rapidminer.util.ImageUtil.createImageIcon;
 
@@ -23,10 +32,13 @@ public class CSVParserWindow extends JFrame {
     private final JLabel statusIcon;
     private final JTextField selectedFileName;
     private final JTextField wsURLField;
+    private final JFXPanel resultChartPanel;
+    private final JTabbedPane resultPanelTabbedPane;
     private Map<String, List<String>> parsedData;
     private JButton parseButton;
     private JButton wsCallButton;
     private File selectedFile;
+    private StackedBarChart stackedBarChart;
 
     public CSVParserWindow() throws HeadlessException {
         super("CSV Parser");
@@ -34,6 +46,7 @@ public class CSVParserWindow extends JFrame {
         /**
          * init gui
          */
+
         setSize(800, 640);
         setMinimumSize(new Dimension(780, 640));
         setLayout(new BorderLayout());
@@ -94,6 +107,9 @@ public class CSVParserWindow extends JFrame {
         getContentPane().add(actionPanel, BorderLayout.NORTH);
 
 
+        // display data panel
+        resultPanelTabbedPane = new JTabbedPane();
+
         // init empty table
         this.csvDataTable = new JTable(new DefaultTableModel());
         JScrollPane tableScrollPanel = new JScrollPane(csvDataTable);
@@ -104,12 +120,21 @@ public class CSVParserWindow extends JFrame {
 
         csvDataTableContainer.add(tableScrollPanel);
 
-        getContentPane().add(csvDataTableContainer, BorderLayout.CENTER);
+
+        resultPanelTabbedPane.addTab("File content", csvDataTableContainer);
+
+        // result data panel
+        resultChartPanel = new JFXPanel();
+
+        resultPanelTabbedPane.addTab("Result chart", resultChartPanel);
+
+        getContentPane().add(resultPanelTabbedPane, BorderLayout.CENTER);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocation(100, 100);
         pack();
         setVisible(true);
+
 
     }
 
@@ -153,6 +178,7 @@ public class CSVParserWindow extends JFrame {
                     parseButton.setEnabled(false);
                     wsCallButton.setEnabled(true);
                     statusIcon.setIcon(createImageIcon(FileStatus.READY_FOR_WS.getImage()));
+                    resultPanelTabbedPane.setSelectedIndex(0);
                 }));
 
         return parseButton;
@@ -167,9 +193,24 @@ public class CSVParserWindow extends JFrame {
         wsCallButton.addActionListener(e -> {
             statusIcon.setIcon(createImageIcon(FileStatus.IN_PROGRESS.getImage()));
             CSVProcessingService.calculateMedian(parsedData, wsURLField.getText(),
-                    () -> {
+                    (series) -> {
                         statusIcon.setIcon(createImageIcon(FileStatus.PROCESSED.getImage()));
                         statusIcon.setToolTipText("File is exported");
+                        Platform.runLater(() -> {
+                            NumberAxis yAxis = new NumberAxis();
+
+                            List<String> categories = (((XYChart.Series<String, Double>) series.get(0)).getData()).stream()
+                                    .map(o -> (o).getXValue()).collect(Collectors.toList());
+
+                            CategoryAxis xAxis = new CategoryAxis(FXCollections.observableArrayList(categories));
+
+                            stackedBarChart = new StackedBarChart(xAxis, yAxis, FXCollections.observableArrayList(series), 25.0d);
+                            stackedBarChart.autosize();
+                            Scene scene = new Scene(stackedBarChart);
+                            resultChartPanel.setScene(scene);
+                        });
+                        resultPanelTabbedPane.setSelectedIndex(1);
+
                     },
                     (error) -> {
                         statusIcon.setIcon(createImageIcon(FileStatus.ERROR.getImage()));
