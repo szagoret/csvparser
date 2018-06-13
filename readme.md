@@ -4,6 +4,9 @@ Standalone java application which is able to parse the provided CSV files, sends
 
 [<img src="doc/csvparser-main.png">](doc/csvparser-main.png)
 
+
+[<img src="doc/csvparser-chart.png">](doc/csvparser-chart.png)
+
 ### Build
 
 ```shell
