@@ -7,7 +7,7 @@ buildscript {
     }
 }
 
-group 'com.rapidminer'
+group 'com.csvparser'
 version '0.1'
 
 apply plugin: 'com.github.johnrengelman.shadow'
@@ -21,7 +21,7 @@ repositories {
 
 jar {
     manifest {
-        attributes "Main-Class": 'com.rapidminer.CSVParserApplication'
+        attributes "Main-Class": 'com.csvparser.CSVParserApplication'
     }
 
     from {
